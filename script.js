@@ -8,13 +8,14 @@
 // 🎨 CẤU HÌNH THEME (CHỈ SỬA DÒNG NÀY KHI ĐỔI THEME MÀU SẮC & BỘ ẢNH):
 // Đổi 'pink' thành 'green-gold' để chuyển sang bộ Nền Xanh Bạc Hà, Nụ Sen Vàng Gold & Bó Hoa Đôi Xum Xuê
 // ==========================================================================
-const ACTIVE_THEME = 'green-gold'; // 'pink' hoặc 'green-gold'
+let currentTheme = 'green-gold'; // 'pink' hoặc 'green-gold'
 
 /**
- * Tự động áp dụng theme tương ứng với ACTIVE_THEME khi trang load
+ * Tự động áp dụng theme tương ứng với currentTheme khi trang load
  * @param {string} themeName - 'pink' hoặc 'green-gold'
  */
 function applyTheme(themeName) {
+  currentTheme = themeName;
   if (themeName === 'green-gold') {
     document.documentElement.setAttribute('data-theme', 'green-gold');
   } else {
@@ -28,8 +29,29 @@ function applyTheme(themeName) {
   });
 }
 
-// Khai báo hàm switch màu & ảnh toàn cục để thử nghiệm nhanh trên F12 Console: setCardTheme('green-gold')
+/**
+ * Chuyển đổi qua lại giữa 2 Theme ('green-gold' <-> 'pink') khi bấm vào chữ "LỄ DẠM NGÕ"
+ * @param {Event} [event]
+ */
+function toggleTheme(event) {
+  if (event) {
+    event.stopPropagation();
+  }
+  const nextTheme = currentTheme === 'green-gold' ? 'pink' : 'green-gold';
+  applyTheme(nextTheme);
+
+  // Phản hồi thị giác cho chữ tiêu đề khi chuyển theme
+  const title = document.querySelector('.card-title');
+  if (title) {
+    title.classList.remove('theme-pop');
+    void title.offsetWidth;
+    title.classList.add('theme-pop');
+  }
+}
+
+// Khai báo các hàm toàn cục
 window.setCardTheme = applyTheme;
+window.toggleTheme = toggleTheme;
 
 // ==========================================================================
 // 🎵 DANH SÁCH NHẠC NỀN (PLAYLIST):
@@ -152,9 +174,19 @@ function generateShuffleOrder(lastTrackIndex = -1) {
  * Load Track by Index in MUSIC_PLAYLIST
  */
 function loadTrack(index) {
-  if (!bgMusic || !musicSource || MUSIC_PLAYLIST.length === 0) return;
+  if (!bgMusic || MUSIC_PLAYLIST.length === 0) return;
   currentTrackIndex = index;
-  musicSource.src = MUSIC_PLAYLIST[currentTrackIndex];
+  const targetSrc = MUSIC_PLAYLIST[currentTrackIndex];
+  
+  // Tạm dừng bài đang phát để hủy stream cũ sạch sẽ
+  try {
+    bgMusic.pause();
+  } catch (e) {}
+
+  if (musicSource) {
+    musicSource.src = targetSrc;
+  }
+  bgMusic.src = targetSrc;
   bgMusic.load();
 }
 
@@ -180,9 +212,11 @@ function advanceNextTrack() {
     const lastTrack = shuffledPlaylist[shuffledPlaylist.length - 1];
     shuffledPlaylist = generateShuffleOrder(lastTrack);
     currentShuffleIndex = 0;
+    console.log("🎵 Đã phát hết 1 vòng Playlist! Khởi tạo vòng phát ngẫu nhiên mới không lặp lại.");
   }
 
   loadTrack(shuffledPlaylist[currentShuffleIndex]);
+  console.log(`🎶 [Bài ${currentShuffleIndex + 1}/${shuffledPlaylist.length}] Đang phát: ${MUSIC_PLAYLIST[currentTrackIndex]}`);
 }
 
 /**
@@ -191,7 +225,11 @@ function advanceNextTrack() {
 function playNextTrack() {
   advanceNextTrack();
   if (isMusicPlaying) {
-    bgMusic.play().catch(err => console.log("Play error:", err));
+    bgMusic.play().catch(err => {
+      if (err.name !== 'AbortError') {
+        console.log("Play error:", err);
+      }
+    });
   }
 }
 
@@ -216,7 +254,12 @@ function changeTrack(event) {
   bgMusic.play().then(() => {
     isMusicPlaying = true;
     updateMusicUI(true);
-  }).catch(err => console.log("Audio play error on change track:", err));
+  }).catch(err => {
+    // Bỏ qua log AbortError khi người dùng bấm đổi bài liên tục (trình duyệt tự hủy luồng stream cũ)
+    if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+      console.log("Audio play error on change track:", err);
+    }
+  });
 }
 
 /**
@@ -234,7 +277,9 @@ function toggleMusic() {
       isMusicPlaying = true;
       updateMusicUI(true);
     }).catch(err => {
-      console.log("Audio waiting for user gesture:", err);
+      if (err.name !== 'AbortError') {
+        console.log("Audio waiting for user gesture:", err);
+      }
     });
   }
 }
@@ -254,21 +299,13 @@ function handleFirstGesture() {
 }
 
 // Log diagnostic confirmation
-console.log("3D Fullscreen Card Initialized. Active Theme:", ACTIVE_THEME);
+console.log("3D Fullscreen Card Initialized. Active Theme:", currentTheme);
 
 // Initialize on Document Load
 document.addEventListener('DOMContentLoaded', () => {
-  applyTheme(ACTIVE_THEME);
+  applyTheme(currentTheme);
   startAutoSceneLoop();
   initAudio();
-
-  // Attach click listeners to heart icons
-  document.querySelectorAll('.heart-icon-center').forEach(heart => {
-    heart.addEventListener('click', (e) => {
-      e.stopPropagation();
-      changeTrack(e);
-    });
-  });
 
   // Automatically play next song in playlist when current track finishes
   if (bgMusic) {

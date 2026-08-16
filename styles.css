@@ -14,6 +14,8 @@
   --color-text-title: #2A2A2A;
   --color-text-script: #8B2C42;
   --color-text-script-light: #A85A6E;
+  --color-script-accent: var(--color-text-script);
+  --color-script-support: var(--color-text-title);
   --color-heart-accent: #E8879F;
   --color-watermark: rgba(232, 135, 159, 0.14);
   --color-border: #E8D5CC;
@@ -36,9 +38,11 @@
   --color-bg-primary: #E9F1E1;        /* Nền xanh bạc hà nhã nhặn */
   --color-bg-secondary: #DCE9D0;      /* Gradient xanh lục nhạt */
   --color-bg-highlight: #F5F8F0;      /* Vệt sáng watercolor mềm giữa thiệp */
-  --color-text-title: #2E4433;        /* Chữ xanh rêu đậm */
-  --color-text-script: #2C4536;       /* Chữ tên xanh rêu */
-  --color-text-script-light: #3B5A45; /* Chữ ngày âm xanh rêu nhạt */
+  --color-text-title: #1F3A2E;        /* dùng cho .card-title "LỄ DẠM NGÕ" */
+  --color-text-script: #2C4A3A;       /* dùng cho tên cô dâu chú rể (.name-line) */
+  --color-text-script-light: #5C7A5A; /* dùng cho .lunar-date */
+  --color-script-accent: #9C7A29;     /* vàng champagne, dùng cho các dòng thơ lớn/nhấn mạnh */
+  --color-script-support: #4F6B52;    /* xanh rêu nhạt, dùng cho các dòng thơ nhỏ/nối câu */
   --color-heart-accent: #D4AF37;      /* Vàng Gold sang trọng */
   --color-watermark: rgba(212, 175, 55, 0.18);
   --color-border: #D4AF37;             /* Khung viền Vàng Gold */
@@ -160,8 +164,8 @@ html, body {
 }
 
 .back-watermark {
-  top: 27%;
-  right: 12%;
+  top: clamp(16%, 20%, 24%);
+  right: clamp(15%, 18vw, 22%);
   transform: translateY(-50%);
   width: clamp(190px, 24vw, 320px);
   aspect-ratio: 3 / 4;
@@ -313,30 +317,40 @@ html, body {
   opacity: 1;
 }
 
-/* Asset BL: Bottom-Left Main Lotus Cluster */
+/* Asset BL: Bottom-Left Main Lotus Cluster (Pink: to hơn / Green-Gold: giữ như cũ) */
 .asset-bl {
-  bottom: 0;
-  left: 0;
-  width: clamp(170px, 30vw, 450px);
-  max-height: clamp(190px, 45vh, 490px);
+  bottom: clamp(-15px, -1.5vh, 0px);
+  left: clamp(-15px, -1.5vw, 0px);
+  width: clamp(210px, 36vw, 560px);
+  max-height: clamp(230px, 55vh, 600px);
   opacity: 1;
   animation: bloomBL 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
 
-/* Asset BR: Bottom-Right Lotus Bloom */
+[data-theme="green-gold"] .asset-bl {
+  width: clamp(170px, 30vw, 450px);
+  max-height: clamp(190px, 45vh, 490px);
+}
+
+/* Asset BR: Bottom-Right Lotus Bloom (Pink: to hơn / Green-Gold: giữ như cũ) */
 .asset-br {
   bottom: clamp(-15px, -1.5vh, 0px);
   right: clamp(-15px, -1.5vw, 0px);
-  width: clamp(170px, 30vw, 450px);
-  max-height: clamp(190px, 45vh, 490px);
+  width: clamp(210px, 36vw, 560px);
+  max-height: clamp(230px, 55vh, 600px);
   opacity: 1;
   animation: bloomBR 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+[data-theme="green-gold"] .asset-br {
+  width: clamp(170px, 30vw, 450px);
+  max-height: clamp(190px, 45vh, 490px);
 }
 
 /* 7. Fixed Header Title "LỄ DẠM NGÕ" */
 .card-header-fixed {
   position: absolute;
-  top: clamp(6.5vh, 9vh, 12vh);
+  top: clamp(8.5vh, 11.5vh, 14.5vh);
   left: 0;
   width: 100vw;
   display: flex;
@@ -348,7 +362,7 @@ html, body {
 
 .card-title {
   font-family: var(--font-serif);
-  font-size: calc(1.8rem + 2.0vw);
+  font-size: calc(2.5rem + 2.5vw);
   font-weight: 600;
   color: var(--color-text-title);
   letter-spacing: 0.1em;
@@ -356,6 +370,28 @@ html, body {
   text-transform: uppercase;
   margin-top: 0;
   animation: gentleDrop 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.6s both;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+.card-title:hover {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+.card-title:active {
+  transform: scale(0.96);
+}
+
+.card-title.theme-pop {
+  animation: themePopAnim 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes themePopAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 /* Dynamic Scenes Viewport */
@@ -565,13 +601,13 @@ html, body {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: min(84vw, 1150px);
+  max-width: min(78vw, 1080px);
   display: flex;
   flex-direction: column;
   justify-content: center;
   margin: auto 0;
-  padding: 0 3vw;
-  gap: clamp(4px, 1.4vh, 16px);
+  padding: 0 2vw;
+  gap: clamp(10px, 2vh, 22px);
 }
 
 .poem-line {
@@ -584,9 +620,9 @@ html, body {
 
 .poem-line.line-1 {
   font-size: calc(1.6rem + 1.8vw);
-  color: var(--color-text-title);
+  color: var(--color-script-support);
   text-align: left;
-  margin-left: 12%;
+  margin-left: -6%;
 }
 
 .scene-2.active .poem-line.line-1 {
@@ -595,9 +631,9 @@ html, body {
 
 .poem-line.line-2 {
   font-size: calc(2.8rem + 3.0vw);
-  color: var(--color-text-script);
+  color: var(--color-script-accent);
   text-align: left;
-  margin-left: 26%;
+  margin-left: 0%;
   margin-top: -4px;
 }
 
@@ -607,9 +643,10 @@ html, body {
 
 .poem-line.line-3 {
   font-size: calc(1.6rem + 1.8vw);
-  color: var(--color-text-title);
-  text-align: right;
-  margin-right: 26%;
+  color: var(--color-script-support);
+  text-align: left;
+  margin-left: 28%;
+  margin-top: -4px;
 }
 
 .scene-2.active .poem-line.line-3 {
@@ -618,9 +655,9 @@ html, body {
 
 .poem-line.line-4 {
   font-size: calc(2.8rem + 3.0vw);
-  color: var(--color-text-script);
-  text-align: right;
-  margin-right: 12%;
+  color: var(--color-script-accent);
+  text-align: left;
+  margin-left: 42%;
   margin-top: -4px;
 }
 
@@ -635,11 +672,11 @@ html, body {
 /* Mobile Responsive Scaling */
 @media (max-width: 600px) {
   .card-header-fixed {
-    top: clamp(4.5vh, 6.5vh, 8vh);
+    top: clamp(6vh, 8.5vh, 10.5vh);
   }
 
   .card-title {
-    font-size: calc(1.3rem + 2.2vw);
+    font-size: calc(1.8rem + 2.8vw);
     letter-spacing: 0.08em;
     padding-left: 0.08em;
   }
@@ -737,23 +774,23 @@ html, body {
 
   .poem-line.line-1 {
     font-size: calc(1.3rem + 2.5vw);
-    color: var(--color-text-title);
+    color: var(--color-script-support);
   }
 
   .poem-line.line-2 {
     font-size: calc(2.2rem + 4.2vw);
-    color: var(--color-text-script);
+    color: var(--color-script-accent);
     margin-top: -4px;
   }
 
   .poem-line.line-3 {
     font-size: calc(1.3rem + 2.5vw);
-    color: var(--color-text-title);
+    color: var(--color-script-support);
   }
 
   .poem-line.line-4 {
     font-size: calc(2.2rem + 4.2vw);
-    color: var(--color-text-script);
+    color: var(--color-script-accent);
     margin-top: -4px;
   }
 
@@ -770,12 +807,25 @@ html, body {
     right: -28px;
   }
   .asset-bl {
+    width: clamp(165px, 48vw, 290px);
+    max-height: 40vh;
+    bottom: clamp(-10px, -1vh, 0px);
+    left: clamp(-10px, -1vw, 0px);
+  }
+  [data-theme="green-gold"] .asset-bl {
     width: clamp(140px, 42vw, 240px);
     max-height: 32vh;
   }
+
   .asset-br {
-    width: clamp(135px, 40vw, 230px);
-    max-height: 30vh;
+    width: clamp(165px, 48vw, 290px);
+    max-height: 40vh;
+    bottom: clamp(-10px, -1vh, 0px);
+    right: clamp(-10px, -1vw, 0px);
+  }
+  [data-theme="green-gold"] .asset-br {
+    width: clamp(140px, 42vw, 240px);
+    max-height: 32vh;
   }
 
   .divider-wrapper {
@@ -787,7 +837,7 @@ html, body {
 /* Tablet & Small Laptop (601px - 1024px) */
 @media (min-width: 601px) and (max-width: 1024px) {
   .card-title {
-    font-size: calc(1.6rem + 2.2vw);
+    font-size: calc(2.2rem + 2.6vw);
   }
 
   .name-block {
@@ -816,7 +866,7 @@ html, body {
 /* Standard Desktop (1025px - 1440px) */
 @media (min-width: 1025px) and (max-width: 1440px) {
   .card-title {
-    font-size: calc(1.8rem + 2.0vw);
+    font-size: calc(2.5rem + 2.5vw);
   }
 
   .name-block {
@@ -845,7 +895,7 @@ html, body {
 /* Large Displays & 2K/4K Monitors (> 1440px) */
 @media (min-width: 1441px) {
   .card-title {
-    font-size: calc(2.2rem + 1.8vw);
+    font-size: calc(3.0rem + 2.2vw);
   }
 
   .name-block {
