@@ -703,15 +703,19 @@ html, body {
   }
 
   .name-block {
-    font-size: calc(1.8rem + 4.2vw);
+    font-size: calc(1.6rem + 3.2vw);
+  }
+
+  .name-line.line-second {
+    margin-left: 0 !important;
   }
 
   .name-left {
-    padding-right: clamp(55px, 16vw, 85px);
+    padding-right: clamp(40px, 11vw, 65px);
   }
 
   .name-right {
-    padding-left: clamp(55px, 16vw, 85px);
+    padding-left: clamp(40px, 11vw, 65px);
   }
 
   .solar-date {
