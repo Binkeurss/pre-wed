@@ -6,9 +6,9 @@
   <title>Lễ Dạm Ngõ - Lâm Mạnh & Ngọc Ánh</title>
   
   <!-- Website Favicon & App Icon (Bông hoa hồng ở góc phải trên) -->
-  <link rel="icon" type="image/png" href="assets/lotus-top-right.png">
-  <link rel="shortcut icon" type="image/png" href="assets/lotus-top-right.png">
-  <link rel="apple-touch-icon" href="assets/lotus-top-right.png">
+  <link rel="icon" type="image/png" href="assets/pink/lotus-top-right.png" data-asset="lotus-top-right.png">
+  <link rel="shortcut icon" type="image/png" href="assets/pink/lotus-top-right.png" data-asset="lotus-top-right.png">
+  <link rel="apple-touch-icon" href="assets/pink/lotus-top-right.png" data-asset="lotus-top-right.png">
 
   <!-- Google Fonts for Vietnamese Calligraphy & Serif Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,10 +30,10 @@
       <div class="card-border-inner"></div>
 
       <!-- Lotus Assets (4 Independent Corners Framing the Card) -->
-      <img src="assets/lotus-top-left.png" alt="Lotus Top Left Lineart" class="asset-lotus asset-tl">
-      <img src="assets/lotus-top-right.png" alt="Lotus Top Right Colored" class="asset-lotus asset-tr">
-      <img src="assets/lotus-bottom-left.png" alt="Lotus Bottom Left" class="asset-lotus asset-bl">
-      <img src="assets/lotus-bottom-right.png" alt="Lotus Bottom Right" class="asset-lotus asset-br">
+      <img src="assets/pink/lotus-top-left.png" data-asset="lotus-top-left.png" alt="Lotus Top Left Colored" class="asset-lotus asset-tl">
+      <img src="assets/pink/lotus-top-right.png" data-asset="lotus-top-right.png" alt="Lotus Top Right Colored" class="asset-lotus asset-tr" id="lotus-music-toggle" onclick="event.stopPropagation(); toggleMusic();" title="Bấm vào bông sen để Bật / Tắt Nhạc Nền">
+      <img src="assets/pink/lotus-bottom-left.png" data-asset="lotus-bottom-left.png" alt="Lotus Bottom Left" class="asset-lotus asset-bl">
+      <img src="assets/pink/lotus-bottom-right.png" data-asset="lotus-bottom-right.png" alt="Lotus Bottom Right" class="asset-lotus asset-br">
 
       <!-- Fixed Header Title (Xuất hiện 1 lần và giữ nguyên) -->
       <div class="card-header-fixed">
@@ -59,8 +59,8 @@
             <!-- Center 囍 Crest & Heart -->
             <div class="center-xi-crest">
               <div class="xi-symbol">囍</div>
-              <div class="heart-icon-center">
-                <svg viewBox="0 0 24 24" fill="#E8879F" xmlns="http://www.w3.org/2000/svg">
+              <div class="heart-icon-center" onclick="changeTrack(event)" title="Bấm để đổi bài hát">
+                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
               </div>
@@ -79,13 +79,13 @@
           <div class="card-bottom-group">
             <!-- Divider Ornament (Asset F) -->
             <div class="divider-wrapper">
-              <img src="assets/divider-ornament.png" alt="Divider Flourish" class="divider-img">
+              <img src="assets/pink/divider-ornament.png" data-asset="divider-ornament.png" alt="Divider Flourish" class="divider-img">
             </div>
 
             <!-- Date Display -->
             <div class="date-block">
-              <div class="solar-date">23.08.2026</div>
-              <div class="lunar-date">(11.07.2026 Bính Ngọ)</div>
+              <div class="solar-date">20.09.2026</div>
+              <div class="lunar-date">(10.08.2026 Bính Ngọ)</div>
             </div>
           </div>
 
@@ -95,11 +95,13 @@
         <!-- ================= PAGE 2 (SCENE 2: ĐOẠN THƠ TRĂM NĂM) ================= -->
         <div class="scene-panel scene-2" id="scene-2">
           
-          <!-- Watermark 囍 & Heart (Background cho thơ) -->
+          <!-- Watermark GIF Cô Dâu Chú Rể Cúi Chào & Heart (Background cho thơ) -->
           <div class="watermark-container back-watermark">
-            <div class="xi-symbol">囍</div>
-            <div class="heart-icon-center">
-              <svg viewBox="0 0 24 24" fill="#E8879F" xmlns="http://www.w3.org/2000/svg">
+            <div class="couple-illustration">
+              <img src="assets/pink/couple-thank-you.gif" data-asset="couple-thank-you.gif" alt="Cô dâu chú rể cúi chào cảm ơn" class="couple-gif-img">
+            </div>
+            <div class="heart-icon-center" onclick="changeTrack(event)" title="Bấm để đổi bài hát">
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
             </div>
@@ -120,11 +122,6 @@
     </div> <!-- /card-unified -->
 
   </main> <!-- /fullscreen-stage -->
-
-  <!-- Floating Music Control Button -->
-  <div class="music-control" id="music-control" onclick="event.stopPropagation(); toggleMusic();" title="Bật / Tắt Nhạc Nền">
-    <span class="music-icon" id="music-icon">🎵</span>
-  </div>
 
   <!-- Background Music Audio Element -->
   <audio id="bg-music" preload="auto">

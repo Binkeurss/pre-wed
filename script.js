@@ -1,8 +1,35 @@
 /**
  * ==========================================================================
- * LỄ DẠM NGÕ - FULLSCREEN 3D FLIP CARD & BACKGROUND MUSIC CONTROLLER
+ * LỄ DẠM NGÕ - FULLSCREEN CARD & BACKGROUND MUSIC CONTROLLER
  * ==========================================================================
  */
+
+// ==========================================================================
+// 🎨 CẤU HÌNH THEME (CHỈ SỬA DÒNG NÀY KHI ĐỔI THEME MÀU SẮC & BỘ ẢNH):
+// Đổi 'pink' thành 'green-gold' để chuyển sang bộ Nền Xanh Bạc Hà, Nụ Sen Vàng Gold & Bó Hoa Đôi Xum Xuê
+// ==========================================================================
+const ACTIVE_THEME = 'green-gold'; // 'pink' hoặc 'green-gold'
+
+/**
+ * Tự động áp dụng theme tương ứng với ACTIVE_THEME khi trang load
+ * @param {string} themeName - 'pink' hoặc 'green-gold'
+ */
+function applyTheme(themeName) {
+  if (themeName === 'green-gold') {
+    document.documentElement.setAttribute('data-theme', 'green-gold');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+
+  // Tự động cập nhật đường dẫn hình ảnh theo thư mục theme tương ứng (assets/pink/ hoặc assets/green-gold/)
+  document.querySelectorAll('[data-asset]').forEach(img => {
+    const assetName = img.getAttribute('data-asset');
+    img.src = `assets/${themeName}/${assetName}`;
+  });
+}
+
+// Khai báo hàm switch màu & ảnh toàn cục để thử nghiệm nhanh trên F12 Console: setCardTheme('green-gold')
+window.setCardTheme = applyTheme;
 
 // ==========================================================================
 // 🎵 DANH SÁCH NHẠC NỀN (PLAYLIST):
@@ -14,7 +41,12 @@ const MUSIC_PLAYLIST = [
   "assets/mp3/ngoi_nha_hanh_phuc.mp3",
   "assets/mp3/khi_hoan_chau_cach_cach.mp3",
   "assets/mp3/noi_gio_len.mp3",
-  "assets/mp3/ngay_hanh_phuc_lofi.mp3"
+  "assets/mp3/ngay_hanh_phuc_lofi.mp3",
+  "assets/mp3/i_do.mp3",
+  "assets/mp3/perfect.mp3",
+  "assets/mp3/beautiful_in_white.mp3",
+  "assets/mp3/my_love.mp3",
+  "assets/mp3/everytime_we_touch.mp3"
 ];
 
 // ==========================================================================
@@ -24,6 +56,8 @@ const MUSIC_PLAYLIST = [
 const PAGE_1_DURATION = 35000; // Trang 1 (Tên & Ngày): 35 giây
 const PAGE_2_DURATION = 32000; // Trang 2 (Đoạn thơ): 32 giây
 
+let shuffledPlaylist = [];
+let currentShuffleIndex = 0;
 let currentTrackIndex = 0;
 let currentScene = 1;
 let autoSceneTimeout = null;
@@ -32,8 +66,22 @@ let isMusicPlaying = false;
 // DOM Elements
 const bgMusic = document.getElementById('bg-music');
 const musicSource = document.getElementById('music-source');
-const musicControl = document.getElementById('music-control');
-const musicIcon = document.getElementById('music-icon');
+
+/**
+ * Cập nhật giao diện nút Bông sen góc phải trên khi bật/tắt nhạc
+ */
+function updateMusicUI(playing) {
+  const lotusToggle = document.getElementById('lotus-music-toggle') || document.querySelector('.asset-tr');
+  if (lotusToggle) {
+    if (playing) {
+      lotusToggle.classList.add('playing');
+      lotusToggle.classList.remove('muted');
+    } else {
+      lotusToggle.classList.remove('playing');
+      lotusToggle.classList.add('muted');
+    }
+  }
+}
 
 /**
  * Schedule Next Automatic Scene Transition
@@ -80,45 +128,99 @@ function startAutoSceneLoop() {
 }
 
 /**
- * Shuffle Playlist (Fisher-Yates Algorithm)
+ * Generate a new random shuffle order of playlist indices.
+ * Guarantees all songs are played once per cycle.
+ * Prevents repeating the last track when starting a new cycle.
  */
-function shufflePlaylist(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+function generateShuffleOrder(lastTrackIndex = -1) {
+  const indices = MUSIC_PLAYLIST.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [indices[i], indices[j]] = [indices[j], indices[i]];
   }
+
+  // Avoid playing the exact same song back-to-back across cycle boundary
+  if (indices.length > 1 && indices[0] === lastTrackIndex) {
+    const swapIdx = Math.floor(Math.random() * (indices.length - 1)) + 1;
+    [indices[0], indices[swapIdx]] = [indices[swapIdx], indices[0]];
+  }
+
+  return indices;
 }
 
 /**
- * Load Track by Index
+ * Load Track by Index in MUSIC_PLAYLIST
  */
 function loadTrack(index) {
   if (!bgMusic || !musicSource || MUSIC_PLAYLIST.length === 0) return;
-  currentTrackIndex = (index + MUSIC_PLAYLIST.length) % MUSIC_PLAYLIST.length;
+  currentTrackIndex = index;
   musicSource.src = MUSIC_PLAYLIST[currentTrackIndex];
   bgMusic.load();
 }
 
 /**
- * Initialize Audio Source & Shuffle on Page Load
+ * Initialize Audio Source & Generate First Shuffle Cycle
  */
 function initAudio() {
-  shufflePlaylist(MUSIC_PLAYLIST);
-  loadTrack(0);
+  if (MUSIC_PLAYLIST.length === 0) return;
+  shuffledPlaylist = generateShuffleOrder();
+  currentShuffleIndex = 0;
+  loadTrack(shuffledPlaylist[currentShuffleIndex]);
 }
 
 /**
- * Play Next Track Automatically
+ * Advance to Next Track in the Shuffle Cycle.
+ * When all tracks have been played once, a new randomized cycle starts.
+ */
+function advanceNextTrack() {
+  if (shuffledPlaylist.length === 0) return;
+
+  currentShuffleIndex++;
+  if (currentShuffleIndex >= shuffledPlaylist.length) {
+    const lastTrack = shuffledPlaylist[shuffledPlaylist.length - 1];
+    shuffledPlaylist = generateShuffleOrder(lastTrack);
+    currentShuffleIndex = 0;
+  }
+
+  loadTrack(shuffledPlaylist[currentShuffleIndex]);
+}
+
+/**
+ * Play Next Track Automatically (Triggered when track ends)
  */
 function playNextTrack() {
-  loadTrack(currentTrackIndex + 1);
+  advanceNextTrack();
   if (isMusicPlaying) {
     bgMusic.play().catch(err => console.log("Play error:", err));
   }
 }
 
 /**
- * Toggle Background Music Play / Pause
+ * Manually switch to next random track by clicking heart icon on 囍 symbol.
+ */
+function changeTrack(event) {
+  if (event) {
+    event.stopPropagation();
+  }
+
+  // Visual feedback animation on heart icons
+  const heartElements = document.querySelectorAll('.heart-icon-center');
+  heartElements.forEach(heart => {
+    heart.classList.remove('heart-pulse');
+    void heart.offsetWidth; // Trigger reflow for repeat clicks
+    heart.classList.add('heart-pulse');
+  });
+
+  advanceNextTrack();
+
+  bgMusic.play().then(() => {
+    isMusicPlaying = true;
+    updateMusicUI(true);
+  }).catch(err => console.log("Audio play error on change track:", err));
+}
+
+/**
+ * Toggle Background Music Play / Pause (Bấm vào bông sen góc phải trên)
  */
 function toggleMusic() {
   if (!bgMusic) return;
@@ -126,13 +228,11 @@ function toggleMusic() {
   if (isMusicPlaying) {
     bgMusic.pause();
     isMusicPlaying = false;
-    if (musicControl) musicControl.classList.remove('playing');
-    if (musicIcon) musicIcon.textContent = '🔇';
+    updateMusicUI(false);
   } else {
     bgMusic.play().then(() => {
       isMusicPlaying = true;
-      if (musicControl) musicControl.classList.add('playing');
-      if (musicIcon) musicIcon.textContent = '🎵';
+      updateMusicUI(true);
     }).catch(err => {
       console.log("Audio waiting for user gesture:", err);
     });
@@ -146,8 +246,7 @@ function handleFirstGesture() {
   if (!isMusicPlaying && bgMusic && MUSIC_PLAYLIST.length > 0) {
     bgMusic.play().then(() => {
       isMusicPlaying = true;
-      if (musicControl) musicControl.classList.add('playing');
-      if (musicIcon) musicIcon.textContent = '🎵';
+      updateMusicUI(true);
     }).catch(() => {});
   }
   document.removeEventListener('click', handleFirstGesture);
@@ -155,12 +254,21 @@ function handleFirstGesture() {
 }
 
 // Log diagnostic confirmation
-console.log("3D Fullscreen Card Initialized. Background music loaded.");
+console.log("3D Fullscreen Card Initialized. Active Theme:", ACTIVE_THEME);
 
 // Initialize on Document Load
 document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(ACTIVE_THEME);
   startAutoSceneLoop();
   initAudio();
+
+  // Attach click listeners to heart icons
+  document.querySelectorAll('.heart-icon-center').forEach(heart => {
+    heart.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changeTrack(e);
+    });
+  });
 
   // Automatically play next song in playlist when current track finishes
   if (bgMusic) {
