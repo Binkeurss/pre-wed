@@ -191,6 +191,29 @@ function loadTrack(index) {
 }
 
 /**
+ * Attempt immediate audio playback upon page access.
+ * If browser policy allows, music plays instantly. If blocked, fallback to first user interaction.
+ */
+function attemptAutoplay() {
+  if (!bgMusic || MUSIC_PLAYLIST.length === 0) return;
+
+  const playPromise = bgMusic.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      isMusicPlaying = true;
+      updateMusicUI(true);
+      console.log("🎵 Tự động phát nhạc ngay khi truy cập trang web!");
+    }).catch(err => {
+      console.log("ℹ️ Trình duyệt yêu cầu tương tác đầu tiên để phát nhạc.");
+      // Lắng nghe tương tác đầu tiên nếu trình duyệt bật chính sách Autoplay restriction
+      document.addEventListener('click', handleFirstGesture, { once: true });
+      document.addEventListener('touchstart', handleFirstGesture, { once: true });
+      document.addEventListener('keydown', handleFirstGesture, { once: true });
+    });
+  }
+}
+
+/**
  * Initialize Audio Source & Generate First Shuffle Cycle
  */
 function initAudio() {
@@ -198,6 +221,7 @@ function initAudio() {
   shuffledPlaylist = generateShuffleOrder();
   currentShuffleIndex = 0;
   loadTrack(shuffledPlaylist[currentShuffleIndex]);
+  attemptAutoplay();
 }
 
 /**
@@ -285,7 +309,7 @@ function toggleMusic() {
 }
 
 /**
- * Attempt audio playback on first user gesture (Browser autoplay policy)
+ * Attempt audio playback on first user gesture (Browser autoplay policy fallback)
  */
 function handleFirstGesture() {
   if (!isMusicPlaying && bgMusic && MUSIC_PLAYLIST.length > 0) {
@@ -296,6 +320,7 @@ function handleFirstGesture() {
   }
   document.removeEventListener('click', handleFirstGesture);
   document.removeEventListener('touchstart', handleFirstGesture);
+  document.removeEventListener('keydown', handleFirstGesture);
 }
 
 // Log diagnostic confirmation
@@ -311,8 +336,4 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bgMusic) {
     bgMusic.addEventListener('ended', playNextTrack);
   }
-
-  // Listen for user gestures to start audio
-  document.addEventListener('click', handleFirstGesture);
-  document.addEventListener('touchstart', handleFirstGesture);
 });
