@@ -27,6 +27,12 @@ function applyTheme(themeName) {
     const assetName = img.getAttribute('data-asset');
     img.src = `assets/${themeName}/${assetName}`;
   });
+
+  // Đồng bộ lại bounding box sau khi đổi theme (kích thước font có thể thay đổi)
+  requestAnimationFrame(() => {
+    if (typeof syncNameBoundingBoxes === 'function') syncNameBoundingBoxes();
+    if (typeof syncBottomFlowerSize === 'function') syncBottomFlowerSize();
+  });
 }
 
 /**
@@ -54,6 +60,112 @@ window.setCardTheme = applyTheme;
 window.toggleTheme = toggleTheme;
 
 // ==========================================================================
+// 📐 ĐỒNG BỘ BOUNDING BOX TÊN CÔ DÂU & CHÚ RỂ
+// Bố cục: [Góc trái] + [Gap] + [Border Trái] + [Gap] + [囍] + [Gap] + [Border Phải] + [Gap] + [Góc Phải]
+// Tất cả 4 khoảng [Gap] đều bằng nhau trên mọi kích thước màn hình.
+// Công thức: Gap = (wrapperWidth - 2 × maxNameWidth - xiWidth) / 4
+// ==========================================================================
+function syncNameBoundingBoxes() {
+  const wrapper = document.querySelector('.couple-names-wrapper');
+  const nameLeft = document.querySelector('.name-left');
+  const nameRight = document.querySelector('.name-right');
+  const nameBoxLeft = document.querySelector('.name-left .name-box');
+  const nameBoxRight = document.querySelector('.name-right .name-box');
+  const xiCrest = document.querySelector('.center-xi-crest');
+  if (!wrapper || !nameLeft || !nameRight || !nameBoxLeft || !nameBoxRight || !xiCrest) return;
+
+  // Reset trước khi đo để lấy kích thước tự nhiên
+  nameLeft.style.minWidth = '';
+  nameLeft.style.minHeight = '';
+  nameLeft.style.marginRight = '';
+  nameRight.style.minWidth = '';
+  nameRight.style.minHeight = '';
+  nameRight.style.marginLeft = '';
+
+  // Đo kích thước tự nhiên của .name-box bên trong
+  const leftRect = nameBoxLeft.getBoundingClientRect();
+  const rightRect = nameBoxRight.getBoundingClientRect();
+
+  // Lấy kích thước lớn nhất giữa 2 bên làm Bounding Box đồng nhất
+  const maxW = Math.ceil(Math.max(leftRect.width, rightRect.width));
+  const maxH = Math.ceil(Math.max(leftRect.height, rightRect.height));
+
+  // Gán min-width & min-height đồng nhất cho cả 2 name-block
+  nameLeft.style.minWidth = maxW + 'px';
+  nameLeft.style.minHeight = maxH + 'px';
+  nameRight.style.minWidth = maxW + 'px';
+  nameRight.style.minHeight = maxH + 'px';
+
+  // Đo kích thước wrapper và 囍
+  const wrapperWidth = wrapper.clientWidth;
+  const xiWidth = xiCrest.getBoundingClientRect().width;
+
+  // Tính Gap đều: Gap = (wrapperWidth - 2*maxW - xiWidth) / 4
+  let gap = (wrapperWidth - 2 * maxW - xiWidth) / 4;
+  gap = Math.max(gap, 10); // Đảm bảo tối thiểu 10px
+
+  // Margin từ Border tới 囍 = Gap + xiWidth/2 (vì 囍 absolute nằm giữa)
+  const marginToXi = gap + xiWidth / 2;
+  nameLeft.style.marginRight = marginToXi + 'px';
+  nameRight.style.marginLeft = marginToXi + 'px';
+}
+
+// ==========================================================================
+// 🌸 THU NHỎ HOA GÓC DƯỚI KHI CHẠM BORDER NGÀY THÁNG
+// Đo vùng bounding box của .card-bottom-group (ngày tháng).
+// Nếu .asset-bl hoặc .asset-br chạm vào vùng này → thu nhỏ hoa cho đến khi
+// không còn chồng lấn. Nếu không chạm → giữ nguyên kích thước gốc.
+// ==========================================================================
+function syncBottomFlowerSize() {
+  const dateBox = document.querySelector('.card-bottom-group');
+  const flowerBL = document.querySelector('.asset-bl');
+  const flowerBR = document.querySelector('.asset-br');
+  if (!dateBox || !flowerBL || !flowerBR) return;
+
+  const dateRect = dateBox.getBoundingClientRect();
+
+  // Xử lý cho từng bông hoa góc dưới
+  [flowerBL, flowerBR].forEach(flower => {
+    // Reset scale về 1 trước khi đo
+    flower.style.transform = '';
+    const flowerRect = flower.getBoundingClientRect();
+
+    // Kiểm tra chồng lấn (2 rect giao nhau)
+    const overlaps =
+      flowerRect.left < dateRect.right &&
+      flowerRect.right > dateRect.left &&
+      flowerRect.top < dateRect.bottom &&
+      flowerRect.bottom > dateRect.top;
+
+    if (overlaps) {
+      // Tính tỷ lệ thu nhỏ cần thiết để không chồng lấn
+      // Hoa nằm ở góc dưới, cần đảm bảo đỉnh hoa không vượt lên quá đáy date box
+      const flowerHeight = flowerRect.height;
+      const overlapTop = dateRect.bottom - flowerRect.top;
+      if (overlapTop > 0 && flowerHeight > 0) {
+        const targetHeight = flowerHeight - overlapTop - 5; // 5px margin an toàn
+        let scaleFactor = targetHeight / flowerHeight;
+        scaleFactor = Math.max(scaleFactor, 0.5); // Không thu nhỏ quá 50%
+        flower.style.transform = `scale(${scaleFactor.toFixed(3)})`;
+        flower.style.transformOrigin = flower.classList.contains('asset-bl')
+          ? 'bottom left'
+          : 'bottom right';
+      }
+    }
+  });
+}
+
+// Chạy lại khi thay đổi kích thước cửa sổ
+let _syncRAF = null;
+window.addEventListener('resize', () => {
+  if (_syncRAF) cancelAnimationFrame(_syncRAF);
+  _syncRAF = requestAnimationFrame(() => {
+    syncNameBoundingBoxes();
+    syncBottomFlowerSize();
+  });
+});
+
+// ==========================================================================
 // 🎵 DANH SÁCH NHẠC NỀN (PLAYLIST):
 // Tự động phát bài đầu tiên và tự chuyển bài tiếp theo khi hết bài
 // ==========================================================================
@@ -68,7 +180,19 @@ const MUSIC_PLAYLIST = [
   "assets/mp3/perfect.mp3",
   "assets/mp3/beautiful_in_white.mp3",
   "assets/mp3/my_love.mp3",
-  "assets/mp3/everytime_we_touch.mp3"
+  "assets/mp3/everytime_we_touch.mp3",
+  "assets/mp3/a_little_love.mp3",
+  "assets/mp3/anh_nang_cua_anh.mp3",
+  "assets/mp3/cuoi_nhau_di.mp3",
+  "assets/mp3/duong_quyen_tinh_yeu.mp3",
+  "assets/mp3/may_hong_dua_loi.mp3",
+  "assets/mp3/minh_yeu_nhau_di.mp3",
+  "assets/mp3/sugar.mp3",
+  "assets/mp3/tinh_yeu_mau_hong_lofi.mp3",
+  "assets/mp3/until_you.mp3",
+  "assets/mp3/vo_tuyet_voi_nhat.mp3",
+  "assets/mp3/what_makes_you_beautiful.mp3",
+  "assets/mp3/yeu_anh_cu_de_em.mp3"
 ];
 
 // ==========================================================================
@@ -331,6 +455,18 @@ document.addEventListener('DOMContentLoaded', () => {
   applyTheme(currentTheme);
   startAutoSceneLoop();
   initAudio();
+
+  // Đồng bộ bounding box tên cô dâu & chú rể sau khi DOM sẵn sàng
+  syncNameBoundingBoxes();
+  syncBottomFlowerSize();
+
+  // Chạy lại sau khi font chữ load xong (kích thước có thể thay đổi)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      syncNameBoundingBoxes();
+      syncBottomFlowerSize();
+    });
+  }
 
   // Automatically play next song in playlist when current track finishes
   if (bgMusic) {
