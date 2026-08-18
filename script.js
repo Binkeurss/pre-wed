@@ -180,19 +180,19 @@ const MUSIC_PLAYLIST = [
   "assets/mp3/perfect.mp3",
   "assets/mp3/beautiful_in_white.mp3",
   "assets/mp3/my_love.mp3",
-  "assets/mp3/everytime_we_touch.mp3",
-  "assets/mp3/a_little_love.mp3",
-  "assets/mp3/anh_nang_cua_anh.mp3",
-  "assets/mp3/cuoi_nhau_di.mp3",
-  "assets/mp3/duong_quyen_tinh_yeu.mp3",
-  "assets/mp3/may_hong_dua_loi.mp3",
-  "assets/mp3/minh_yeu_nhau_di.mp3",
-  "assets/mp3/sugar.mp3",
-  "assets/mp3/tinh_yeu_mau_hong_lofi.mp3",
-  "assets/mp3/until_you.mp3",
-  "assets/mp3/vo_tuyet_voi_nhat.mp3",
-  "assets/mp3/what_makes_you_beautiful.mp3",
-  "assets/mp3/yeu_anh_cu_de_em.mp3"
+  // "assets/mp3/everytime_we_touch.mp3",
+  // "assets/mp3/a_little_love.mp3",
+  // "assets/mp3/anh_nang_cua_anh.mp3",
+  // "assets/mp3/cuoi_nhau_di.mp3",
+  // "assets/mp3/duong_quyen_tinh_yeu.mp3",
+  // "assets/mp3/may_hong_dua_loi.mp3",
+  // "assets/mp3/minh_yeu_nhau_di.mp3",
+  // "assets/mp3/sugar.mp3",
+  // "assets/mp3/tinh_yeu_mau_hong_lofi.mp3",
+  // "assets/mp3/until_you.mp3",
+  // "assets/mp3/vo_tuyet_voi_nhat.mp3",
+  // "assets/mp3/what_makes_you_beautiful.mp3",
+  // "assets/mp3/yeu_anh_cu_de_em.mp3"
 ];
 
 // ==========================================================================
