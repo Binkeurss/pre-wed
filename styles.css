@@ -332,11 +332,6 @@ html, body {
   transform-origin: bottom left;
 }
 
-[data-theme="green-gold"] .asset-bl {
-  width: clamp(170px, 30vw, 450px);
-  max-height: clamp(190px, 45vh, 490px);
-}
-
 /* Asset BR: Bottom-Right Lotus Bloom */
 .asset-br {
   bottom: clamp(-10px, -1.0vh, 0px);
@@ -347,11 +342,6 @@ html, body {
   animation: bloomBR 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
   transition: transform 0.3s ease;
   transform-origin: bottom right;
-}
-
-[data-theme="green-gold"] .asset-br {
-  width: clamp(170px, 30vw, 450px);
-  max-height: clamp(190px, 45vh, 490px);
 }
 
 /* 7. Fixed Header Title "LỄ DẠM NGÕ" */
