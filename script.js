@@ -180,6 +180,21 @@ const MUSIC_PLAYLIST = [
   "assets/mp3/perfect.mp3",
   "assets/mp3/beautiful_in_white.mp3",
   "assets/mp3/my_love.mp3",
+  // Các bài hát mới cập nhật (đã chuẩn hóa tên file theo format snake_case đồng nhất):
+  "assets/mp3/hon_ca_yeu.mp3",
+  "assets/mp3/chi_can_co_nhau.mp3",
+  "assets/mp3/xung_doi_cuoi_thoi.mp3",
+  "assets/mp3/ngay_dau_tien.mp3",
+  "assets/mp3/noi_nay_co_anh.mp3",
+  "assets/mp3/thuyen_hoa_remix.mp3",
+  "assets/mp3/yeu_em_hon_moi_ngay.mp3",
+  "assets/mp3/mot_doi.mp3",
+  "assets/mp3/cuoi_nhau_di_live.mp3",
+  "assets/mp3/ta_la_cua_nhau.mp3",
+  "assets/mp3/anh_nang_cua_anh_duc_phuc.mp3",
+  "assets/mp3/dam_cuoi_tren_duong_que.mp3",
+
+  // Các bài đã comment (giữ nguyên không bật):
   // "assets/mp3/everytime_we_touch.mp3",
   // "assets/mp3/a_little_love.mp3",
   // "assets/mp3/anh_nang_cua_anh.mp3",
@@ -307,10 +322,11 @@ function loadTrack(index) {
     bgMusic.pause();
   } catch (e) {}
 
+  const safeSrc = encodeURI(targetSrc);
   if (musicSource) {
-    musicSource.src = targetSrc;
+    musicSource.src = safeSrc;
   }
-  bgMusic.src = targetSrc;
+  bgMusic.src = safeSrc;
   bgMusic.load();
 }
 
